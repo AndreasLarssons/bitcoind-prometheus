@@ -20,6 +20,7 @@ public class MempoolRecorder implements Recorder {
 	private static final Logger logger = LoggerFactory.getLogger(MempoolRecorder.class);
 	private final BitcoinCliCommand bitcoinCliCommand;
 	private final AtomicLong mempoolbytes = Metrics.gauge("node_mempool_bytes", new AtomicLong(0));
+	private final AtomicLong mempoolSize = Metrics.gauge("node_mempool_size", new AtomicLong(0));
 
 	public MempoolRecorder(BitcoinCliCommand bitcoinCliCommand) {
 		this.bitcoinCliCommand = Objects.requireNonNull(bitcoinCliCommand);
@@ -33,7 +34,9 @@ public class MempoolRecorder implements Recorder {
 			try {
 				JsonObject result = JsonParser.parseString(readResult).getAsJsonObject();
 				long bytes = result.get("bytes").getAsLong();
+				long size = result.get("size").getAsLong();
 				mempoolbytes.set(bytes);
+				mempoolSize.set(size);
 				logger.info("Current mempool bytes={}", bytes);
 			} catch (Exception e) {
 				logger.error("Could not parse response s={}", readResult, e);
